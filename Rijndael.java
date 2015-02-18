@@ -58,36 +58,43 @@ public class Rijndael {
             0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74,
             0xe8, 0xcb};
 
+    private static void rotWord(byte[] word) {
+    }
+
+    private static void subWord(byte[] word) {
+    }
+
     /**
      * Extract round keys using Rijndael's key schedule and return the new key.
      * Implemented according to the AES specification.
      */
-    public static ArrayList<Byte> expandKeys(byte[] key, byte[] w, int nb, int nk, int Nr) {
-        int exp_key_size = nb * (nr + 1) * 4;      // Size of expanded key
-        w[:nk*4] = key                             // Initialise first words with cipher key
-        byte[] temp = [0, 0, 0, 0];                // Initialise temp word
-        int offset = nk * 4;                       // Byte offset to get next word
+    public static void expandKeys(byte[] key, byte[] w, int offset, int keySize, int expKeySize) {
+        // Initialise first words with cipher key
+        for (int i = 0; i < key.length; ++i)
+            w[i] = key[i];
+
+        byte[] temp = {0, 0, 0, 0}; // Initialise temp word
 
         int rconIt = 1; // Iterator for Rcon
-        int i = offset;  // Current key size
-        while (i < exp_key_size) {
-            temp = w[i-4:i];
+        int i = offset; // Current key size
+        while (i < expKeySize) {
+            for (int j = i - 4; j < i; ++j)
+                temp[j] = w[j];
             if (i % offset == 0) {
                 // Rotate word, substitute it and XOR with Rcon to transform
                 // multiples of nk
-                rotWord(temp)
-                subWord(temp)
-                temp[0] = temp[0] ^ rcon[rcon_it]
-                rconIt += 1
-            } else if (nk > 6 and i % offset == 16) { // Only performed on key size > 192
-                sub_word(temp)
+                rotWord(temp);
+                subWord(temp);
+                temp[0] = (byte) (temp[0] ^ rcon[rconIt]);
+                rconIt += 1;
+            } else if (keySize > 24 && i % offset == 16) { // Only performed on key size > 192
+                subWord(temp);
+            }
             // Set current word as XOR of previous and the word nk positions
             // earlier
-            for (j in range(4))
-                w[i+j] = w[i-offset+j] ^ temp[j];
+            for (int j = 0; j < 4; ++j)
+                w[i+j] = (byte) (w[i-offset+j] ^ temp[j]);
             i += 4;
         }
-
-        return w;
     }
 }
