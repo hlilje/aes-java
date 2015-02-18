@@ -15,6 +15,10 @@ public class AES {
         ArrayList<Byte> plainText = new ArrayList<Byte>();
         StringBuilder sb          = new StringBuilder();
 
+        int Nb = 4;  // Number of columns (32-bit words) comprising the state
+        int Nk = 4;  // Number of 32-bit words comprising the cipher key
+        int Nr = 10; // Number of rounds
+
         // Read the bytes from stdin
         DataInputStream dis;
         try {
