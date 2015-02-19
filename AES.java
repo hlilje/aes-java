@@ -59,16 +59,10 @@ public class AES {
                 roundKey[j*Nk+i] = w[encRoundOffset+i*Nk+j];
         }
 
-
-        StringBuilder sb = new StringBuilder();
-        for (byte b : roundKey) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
-
-        // Column-wise XOR of state with encryption key
+        // XOR state with encryption key
         int k = 0;
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                // state[j][i] = (byte) (state[j][i] ^ roundKey[k]);
                 state[i][j] = (byte) (state[i][j] ^ roundKey[k]);
                 ++k;
             }
@@ -147,7 +141,6 @@ public class AES {
      */
     private static void encryptState() {
         for (int i = 0; i < numStates; ++i) {
-            // TODO This is the only incorrect method
             addRoundKey(0); // Initial key round
 
             for (int j = 1; j < Nr; ++j) {
@@ -162,11 +155,6 @@ public class AES {
             shiftRows();
             addRoundKey(Nr);
         }
-
-        StringBuilder sb = new StringBuilder();
-        System.out.println("Plain text:");
-        for (byte b : state[0]) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
     }
 
     /**
@@ -176,13 +164,14 @@ public class AES {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                // System.out.write(state[j][i]);
-                sb.append(String.format("%02X ", state[j][i])); // TODO
+                System.out.write(state[j][i]);
+                // sb.append(String.format("%02X ", state[j][i])); // DEBUG
             }
         }
-        // System.out.flush();
-        System.out.println("Result:");
-        System.out.println(sb);
+        System.out.flush();
+        // DEBUG
+        // System.out.println("Result:");
+        // System.out.println(sb);
     }
 
     /**
@@ -215,24 +204,22 @@ public class AES {
         } catch (Exception e){
             e.printStackTrace();
         }
-        // TODO
-        StringBuilder sb = new StringBuilder();
-        System.out.println("Plain text:");
-        for (int i = 0; i < textLength; ++i) sb.append(String.format("%02X ", plainText[i]));
-        System.out.println(sb);
+
+        // StringBuilder sb = new StringBuilder();
+        // System.out.println("Plain text:");
+        // for (int i = 0; i < textLength; ++i) sb.append(String.format("%02X ", plainText[i]));
+        // System.out.println(sb);
+
         // Pad plain text if necessary
         padPlainText();
-
-        // byte[] key = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO
 
         // Expand encryption key
         Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
 
-        // TODO
-        sb = new StringBuilder();
-        System.out.println("Key:");
-        for (byte b : key) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
+        // sb = new StringBuilder();
+        // System.out.println("Key:");
+        // for (byte b : key) sb.append(String.format("%02X ", b));
+        // System.out.println(sb);
 
         // Start encryption
         encryptBlocks();
