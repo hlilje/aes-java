@@ -97,11 +97,7 @@ public class Rijndael {
             if (i % offset == 0) {
                 // Rotate word, substitute it and XOR with Rcon to transform
                 // multiples of nk
-                for (byte b : temp) System.out.print(b + " ");
-                System.out.println();
                 rotWord(temp);
-                for (byte b : temp) System.out.print(b + " ");
-                System.out.println();
                 subWord(temp);
                 temp[0] = (byte) (temp[0] ^ rcon[rconIt]);
                 rconIt += 1;

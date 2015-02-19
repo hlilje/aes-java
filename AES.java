@@ -4,8 +4,6 @@
  * Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 import java.io.DataInputStream;
-import java.util.Arrays;
-import java.util.Collections;
 
 
 public class AES {
@@ -86,10 +84,12 @@ public class AES {
      * shifted cyclically a certain number of steps.
      */
     private static void shiftRows() {
-        for (int i = 0; i < Nb; ++i) {
-            for (int j = 0; j < Nb; ++j) {
-                Collections.rotate(Arrays.asList(state[i]), -j);
-            }
+        byte[] buffer = new byte[3];
+        for (int i = 1; i < Nb; ++i) {
+            int toCopy = i; // Avoid recreating buffer
+            System.arraycopy(state[i], 0, buffer, 0, i);
+            System.arraycopy(state[i], i, state[i], 0, state[i].length - i);
+            System.arraycopy(buffer, 0, state[i], state[i].length - i, toCopy);
         }
     }
 
@@ -190,8 +190,6 @@ public class AES {
     }
 
     public static void main(String[] args) {
-        StringBuilder sb = new StringBuilder();
-
         // Read the bytes from stdin
         DataInputStream dis;
         try {
@@ -213,16 +211,12 @@ public class AES {
         // Expand encryption key
         Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
 
-        for (byte b : w) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
-
         // Start encryption
         encryptBlocks();
 
+        // TODO
+        // StringBuilder sb = new StringBuilder();
         // for (byte b : key) sb.append(String.format("%02X ", b));
-        // System.out.println(sb);
-        // sb = new StringBuilder();
-        // for (byte b : plainText) sb.append(String.format("%02X ", b));
         // System.out.println(sb);
     }
 }
