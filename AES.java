@@ -59,10 +59,19 @@ public class AES {
                 roundKey[j*Nk+i] = w[encRoundOffset+i*Nk+j];
         }
 
-        // Column-wise XOR of state encryption key
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : roundKey) sb.append(String.format("%02X ", b));
+        System.out.println(sb);
+
+        // Column-wise XOR of state with encryption key
+        int k = 0;
         for (int i = 0; i < Nb; ++i) {
-            for (int j = 0; j < Nb; ++j)
-                state[j][i] = (byte) (state[j][i] ^ roundKey[i]);
+            for (int j = 0; j < Nb; ++j) {
+                // state[j][i] = (byte) (state[j][i] ^ roundKey[k]);
+                state[i][j] = (byte) (state[i][j] ^ roundKey[k]);
+                ++k;
+            }
         }
     }
 
@@ -138,6 +147,7 @@ public class AES {
      */
     private static void encryptState() {
         for (int i = 0; i < numStates; ++i) {
+            // TODO This is the only incorrect method
             addRoundKey(0); // Initial key round
 
             for (int j = 1; j < Nr; ++j) {
@@ -152,6 +162,11 @@ public class AES {
             shiftRows();
             addRoundKey(Nr);
         }
+
+        StringBuilder sb = new StringBuilder();
+        System.out.println("Plain text:");
+        for (byte b : state[0]) sb.append(String.format("%02X ", b));
+        System.out.println(sb);
     }
 
     /**
