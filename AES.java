@@ -87,14 +87,14 @@ public class AES {
         }
     }
 
-    /** 
+    /**
      * Multiplication in the Galois field GF(2^8).
      */
-    private static void galoismUlt(byte a, byte b) {
-        byte p = 0;
-        byte hiBitSet = 0;
+    private static byte galoisMult(byte a, byte b) {
+        int p = 0;
+        int hiBitSet = 0;
         for (int i = 0; i < 8; ++i) {
-            if (b & 1 == 1)
+            if ((b & 1) == 1)
                 p ^= a;
             hiBitSet = a & 0x80;
             a <<= 1;
@@ -102,24 +102,32 @@ public class AES {
                 a ^= 0x1b;
             b >>= 1;
         }
-        return p % 256;
+        return (byte) (p % 256);
     }
 
-def mix_column(column):
-    """
-    Mix one column by by considering it as a polynomial and performing
-    operations in the Galois field (2^8).
-    """
-    # XOR is addition in this field
-    temp = copy.copy(column) # Store temporary column for operations
-    column[0] = galois_mult(temp[0], 2) ^ galois_mult(temp[1], 3) ^ \
-                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 1)
-    column[1] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 2) ^ \
-                galois_mult(temp[2], 3) ^ galois_mult(temp[3], 1)
-    column[2] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 1) ^ \
-                galois_mult(temp[2], 2) ^ galois_mult(temp[3], 3)
-    column[3] = galois_mult(temp[0], 3) ^ galois_mult(temp[1], 1) ^ \
-                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 2)
+    /**
+     * Mix one column by by considering it as a polynomial and performing
+     * operations in the Galois field (2^8).
+     */
+    private static void mixColumns() {
+        for (int i = 0; i < Nb; ++i) {
+            // Store temporary column for operations
+            byte[] temp = new byte[Nb];
+            for (int j = 0; j < Nb; ++i) {
+                temp[j] = state[j][i];
+            }
+            // System.arraycopy(state[i], 0, temp, 0, Nb);
+            // XOR is addition in this field
+            state[0][i] = (byte) (galoisMult(temp[0], (byte) 2) ^ galoisMult(temp[1], (byte) 3) ^
+                                  galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 1));
+            state[1][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 2) ^
+                                  galoisMult(temp[2], (byte) 3) ^ galoisMult(temp[3], (byte) 1));
+            state[2][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 1) ^
+                                  galoisMult(temp[2], (byte) 2) ^ galoisMult(temp[3], (byte) 3));
+            state[3][i] = (byte) (galoisMult(temp[0], (byte) 3) ^ galoisMult(temp[1], (byte) 1) ^
+                                  galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 2));
+        }
+    }
 
     /**
      * Encrypt the current state.
