@@ -9,13 +9,13 @@ import java.util.Collections;
 
 
 public class AES {
-    private static final int Nb             = 4;        // Number of columns (32-bit words) comprising the state
-    private static final int Nk             = 4;        // Number of 32-bit words comprising the cipher key
-    private static final int Nr             = 10;       // Number of rounds
-    private static final int LENGTH_KEY     = 16;       // Key length in bytes
-    private static final int LENGTH_DATA    = 16000000; // Maximum plain text length in bytes
-    private static final int LENGTH_EXP_KEY = 176;      // Expanded key length in bytes
-    private static final int LENGTH_STATE   = Nb * Nb;  // Length of states in bytes
+    private static final int Nb             = 4;                 // Number of columns (32-bit words) comprising the state
+    private static final int Nk             = 4;                 // Number of 32-bit words comprising the cipher key
+    private static final int Nr             = 10;                // Number of rounds
+    private static final int LENGTH_DATA    = 16000000;          // Maximum plain text length in bytes
+    private static final int LENGTH_KEY     = Nk * 4;            // Key length in bytes
+    private static final int LENGTH_EXP_KEY = Nb * (Nr + 1) * 4; // Expanded key length in bytes
+    private static final int LENGTH_STATE   = Nb * Nb;           // Length of states in bytes
 
     private static byte[] key       = new byte[LENGTH_KEY];     // Encryption key
     private static byte[] plainText = new byte[LENGTH_DATA];    // Unencrypted bytes
@@ -208,13 +208,17 @@ public class AES {
             e.printStackTrace();
         }
 
+        byte[] key = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
         // Expand encryption key
         Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
+
+        for (byte b : w) sb.append(String.format("%02X ", b));
+        System.out.println(sb);
 
         // Start encryption
         encryptBlocks();
 
-        // Print key and data
         // for (byte b : key) sb.append(String.format("%02X ", b));
         // System.out.println(sb);
         // sb = new StringBuilder();

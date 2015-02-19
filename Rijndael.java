@@ -82,7 +82,8 @@ public class Rijndael {
      */
     public static void expandKeys(byte[] key, byte[] w, int offset, int keySize, int expKeySize) {
         // Initialise first words with cipher key
-        for (int i = 0; i < key.length; ++i) w[i] = key[i];
+        for (int i = 0; i < key.length; ++i)
+            w[i] = key[i];
 
         byte[] temp = {0, 0, 0, 0}; // Initialise temp word
 
@@ -90,7 +91,7 @@ public class Rijndael {
         int i = offset; // Current key size
         while (i < expKeySize) {
             for (int j = 0; j < 4; ++j) {
-                temp[j] = w[i-4];
+                temp[j] = w[i-4+j];
             }
             if (i % offset == 0) {
                 // Rotate word, substitute it and XOR with Rcon to transform
