@@ -116,7 +116,6 @@ public class AES {
             for (int j = 0; j < Nb; ++i) {
                 temp[j] = state[j][i];
             }
-            // System.arraycopy(state[i], 0, temp, 0, Nb);
             // XOR is addition in this field
             state[0][i] = (byte) (galoisMult(temp[0], (byte) 2) ^ galoisMult(temp[1], (byte) 3) ^
                                   galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 1));
@@ -133,7 +132,7 @@ public class AES {
      * Encrypt the current state.
      */
     private static void encryptState() {
-        for (int i; i < Nb; ++i) {
+        for (int i = 0; i < Nb; ++i) {
             addRoundKey(); // Initial key round
 
             for (int k = 1; k < Nr; ++k) {
@@ -151,6 +150,18 @@ public class AES {
     }
 
     /**
+     * Print the encrypted state to stdout.
+     */
+    private static void outputState() {
+        for (int i = 0; i < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
+                System.out.write(state[j][i]);
+            }
+        }
+        System.out.flush();
+    }
+
+    /**
      * Iteratively encrypt blocks.
      */
     private static void encryptBlocks() {
@@ -163,7 +174,7 @@ public class AES {
             // Encrypt the state
             encryptState();
             // Output encrypted block
-            // outputState();
+            outputState();
         }
     }
 
