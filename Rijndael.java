@@ -88,8 +88,6 @@ public class Rijndael {
 
         int rconIt = 1; // Iterator for Rcon
         int i = offset; // Current key size
-        System.out.println(expKeySize);
-        System.out.println(offset);
         while (i < expKeySize) {
             for (int j = 0; j < 4; ++j) {
                 temp[j] = w[i-4];

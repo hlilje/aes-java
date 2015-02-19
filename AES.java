@@ -24,7 +24,6 @@ public class AES {
     private static int textLength   = 0;                        // Length of plain text in bytes
     private static int numStates    = 0;                        // Number of states
     private static int plainTextIt  = 0;                        // Current byte position in plain text
-    private static int roundKeyIt   = 0;                        // Current expanded key byte position
 
 
     /**
@@ -53,12 +52,19 @@ public class AES {
      * Combine each byte of the state with a block of the round key using bitwise
      * XOR.
      */
-    private static void addRoundKey() {
+    private static void addRoundKey(int encRound, int offset) {
+        byte[] roundKey = new byte[offset];
+        int encRoundOffset = encRound * offset;
+        // Extract the transpose key to get order as columns instead of rows
+        for (int i = 0; i < Nk; ++i) {
+            for (int j = 0; j < Nk; ++j)
+                roundKey[j*Nk+i] = w[encRoundOffset+i*Nk+j];
+        }
+
         // Column-wise XOR of state encryption key
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                state[j][i] = (byte) (state[j][i] ^ w[roundKeyIt]);
-                ++roundKeyIt;
+                state[j][i] = (byte) (state[j][i] ^ roundKey[i]);
             }
         }
     }
@@ -113,7 +119,7 @@ public class AES {
         for (int i = 0; i < Nb; ++i) {
             // Store temporary column for operations
             byte[] temp = new byte[Nb];
-            for (int j = 0; j < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
                 temp[j] = state[j][i];
             }
             // XOR is addition in this field
@@ -132,20 +138,21 @@ public class AES {
      * Encrypt the current state.
      */
     private static void encryptState() {
+        int offset = Nb * Nb;
         for (int i = 0; i < Nb; ++i) {
-            addRoundKey(); // Initial key round
+            addRoundKey(0, offset); // Initial key round
 
-            for (int k = 1; k < Nr; ++k) {
+            for (int j = 1; j < Nr; ++j) {
                 subBytes();
                 shiftRows();
                 mixColumns();
-                addRoundKey();
+                addRoundKey(j, offset);
             }
 
             // Leave out MixColumns for final round
             subBytes();
             shiftRows();
-            addRoundKey();
+            addRoundKey(Nr, offset);
         }
     }
 
