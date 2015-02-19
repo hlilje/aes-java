@@ -9,21 +9,21 @@ import java.util.Collections;
 
 
 public class AES {
-    private static final int Nb             = 4;                 // Number of columns (32-bit words) comprising the state
-    private static final int Nk             = 4;                 // Number of 32-bit words comprising the cipher key
-    private static final int Nr             = 10;                // Number of rounds
-    private static final int LENGTH_DATA    = 16000000;          // Maximum plain text length in bytes
-    private static final int LENGTH_KEY     = Nk * 4;            // Key length in bytes
-    private static final int LENGTH_EXP_KEY = Nb * (Nr + 1) * 4; // Expanded key length in bytes
-    private static final int LENGTH_STATE   = Nb * Nb;           // Length of states in bytes
+    private static final int Nb             = 4;                        // Number of columns (32-bit words) comprising the state
+    private static final int Nk             = 4;                        // Number of 32-bit words comprising the cipher key
+    private static final int Nr             = 10;                       // Number of rounds
+    private static final int LENGTH_DATA    = 16000000;                 // Maximum plain text length in bytes
+    private static final int LENGTH_KEY     = Nk * 4;                   // Key length in bytes
+    private static final int LENGTH_EXP_KEY = Nb * (Nr + 1) * 4;        // Expanded key length in bytes
+    private static final int LENGTH_STATE   = Nb * Nb;                  // Length of states in bytes
+    private static final byte[] key         = new byte[LENGTH_KEY];     // Encryption key
+    private static final byte[] plainText   = new byte[LENGTH_DATA];    // Unencrypted bytes
+    private static final byte[] w           = new byte[LENGTH_EXP_KEY]; // Expanded cipher key
+    private static final byte[][] state     = new byte[Nb][Nb];         // State matrix
 
-    private static byte[] key       = new byte[LENGTH_KEY];     // Encryption key
-    private static byte[] plainText = new byte[LENGTH_DATA];    // Unencrypted bytes
-    private static byte[] w         = new byte[LENGTH_EXP_KEY]; // Expanded cipher key
-    private static byte[][] state   = new byte[Nb][Nb];         // State matrix
-    private static int textLength   = 0;                        // Length of plain text in bytes
-    private static int numStates    = 0;                        // Number of states
-    private static int plainTextIt  = 0;                        // Current byte position in plain text
+    private static int textLength   = 0; // Length of plain text in bytes
+    private static int numStates    = 0; // Number of states
+    private static int plainTextIt  = 0; // Current byte position in plain text
 
 
     /**
