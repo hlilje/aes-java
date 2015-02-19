@@ -62,6 +62,18 @@ public class AES {
     }
 
     /**
+     * Perform a non-linear substitution step by replacing each byte with another
+     * according to a lookup table.
+     */
+    private static void sybBytes() {
+        for (int i = 0; i < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
+                state[i][j] = (byte) Rijndael.sbox[state[i][j]];
+            }
+        }
+    }
+
+    /**
      * Encrypt the current state.
      */
     private static void encryptState() {
