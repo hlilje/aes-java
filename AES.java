@@ -19,9 +19,9 @@ public class AES {
     private static final byte[] w           = new byte[LENGTH_EXP_KEY]; // Expanded cipher key
     private static final byte[][] state     = new byte[Nb][Nb];         // State matrix
 
-    private static int textLength   = 0; // Length of plain text in bytes
-    private static int numStates    = 0; // Number of states
-    private static int plainTextIt  = 0; // Current byte position in plain text
+    private static int textLength  = 0; // Length of plain text in bytes
+    private static int numStates   = 0; // Number of states
+    private static int plainTextIt = 0; // Current byte position in plain text
 
 
     /**
@@ -164,20 +164,20 @@ public class AES {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                System.out.write(state[j][i]);
-                // sb.append(String.format("%02X ", state[j][i])); // DEBUG
+                // System.out.write(state[j][i]);
+                sb.append(String.format("%02X ", state[j][i])); // DEBUG
             }
         }
-        System.out.flush();
+        // System.out.flush();
         // DEBUG
-        // System.out.println("Result:");
-        // System.out.println(sb);
+        System.out.println("Result:");
+        System.out.println(sb);
     }
 
     /**
-     * Iteratively encrypt blocks.
+     * Iteratively encrypt all states (blocks).
      */
-    private static void encryptBlocks() {
+    private static void encrypt() {
         for (int i = 0; i < numStates; ++i) {
             // Create one state
             createState();
@@ -222,6 +222,6 @@ public class AES {
         // System.out.println(sb);
 
         // Start encryption
-        encryptBlocks();
+        encrypt();
     }
 }
