@@ -18,7 +18,7 @@ public class AES {
     private static byte[] key       = new byte[LENGTH_KEY];     // Encryption key
     private static byte[] plainText = new byte[LENGTH_DATA];    // Unencrypted bytes
     private static byte[] w         = new byte[LENGTH_EXP_KEY]; // Expanded cipher key
-    private static byte[][] state;                              // State matrix
+    private static byte[][] state   = new byte[Nb][Nb];         // State matrix
     private static int textLength   = 0;                        // Length of plain text in bytes
     private static int numStates    = 0;                        // Number of states
     private static int plainTextIt  = 0;                        // Current byte position in plain text
@@ -38,10 +38,8 @@ public class AES {
      * Fill the current state with padded plain text.
      */
     private static void createState() {
-        state = new byte[Nb][Nb];
-
-        for (int i = 0; i < LENGTH_STATE; ++i) {
-            for (int j = 0; j < LENGTH_STATE; ++j) {
+        for (int i = 0; i < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
                 state[j][i] = plainText[plainTextIt];
                 ++plainTextIt;
             }
@@ -52,6 +50,21 @@ public class AES {
      * Encrypt the current state.
      */
     private static void encryptState() {
+        for (int i; i < Nb; ++i) {
+            addRoundKey(); // Initial key round
+
+            for (int k = 1; k < Nr; ++k) {
+                subBytes();
+                shiftRows();
+                mixColumns();
+                addRoundKey();
+            }
+
+            // Leave out MixColumns for final round
+            subBytes();
+            shiftRows();
+            addRoundKey();
+        }
     }
 
     /**
