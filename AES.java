@@ -70,7 +70,7 @@ public class AES {
     private static void subBytes() {
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                state[i][j] = (byte) Rijndael.sbox[state[i][j]];
+                state[i][j] = (byte) Rijndael.sbox[state[i][j] & 0xFF];
             }
         }
     }

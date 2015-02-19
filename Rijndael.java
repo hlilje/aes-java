@@ -65,7 +65,7 @@ public class Rijndael {
      */
     private static void subWord(byte[] word) {
         for (int i = 0; i < 4; ++i)
-            word[i] = (byte) sbox[word[i]];
+            word[i] = (byte) sbox[word[i] & 0xFF];
     }
 
     /**
@@ -88,9 +88,12 @@ public class Rijndael {
 
         int rconIt = 1; // Iterator for Rcon
         int i = offset; // Current key size
+        System.out.println(expKeySize);
+        System.out.println(offset);
         while (i < expKeySize) {
-            for (int j = i - 4; j < i; ++j)
-                temp[j] = w[j];
+            for (int j = 0; j < 4; ++j) {
+                temp[j] = w[i-4];
+            }
             if (i % offset == 0) {
                 // Rotate word, substitute it and XOR with Rcon to transform
                 // multiples of nk
