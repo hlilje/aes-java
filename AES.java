@@ -139,7 +139,7 @@ public class AES {
      */
     private static void encryptState() {
         int offset = Nb * Nb;
-        for (int i = 0; i < Nb; ++i) {
+        for (int i = 0; i < numStates; ++i) {
             addRoundKey(0, offset); // Initial key round
 
             for (int j = 1; j < Nr; ++j) {
