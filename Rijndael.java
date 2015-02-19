@@ -81,7 +81,7 @@ public class Rijndael {
      * Extract round keys using Rijndael's key schedule and return the new key.
      * Implemented according to the AES specification.
      */
-    public static void expandKeys(byte[] key, byte[] w, int offset, int keySize, int expKeySize) {
+    public static void expandKey(byte[] key, byte[] w, int offset, int keySize, int expKeySize) {
         // Initialise first words with cipher key
         for (int i = 0; i < key.length; ++i)
             w[i] = key[i];

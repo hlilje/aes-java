@@ -214,7 +214,7 @@ public class AES {
         padPlainText();
 
         // Expand encryption key
-        Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
+        Rijndael.expandKey(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
 
         // sb = new StringBuilder();
         // System.out.println("Key:");
