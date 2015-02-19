@@ -185,7 +185,7 @@ public class AES {
             // Encrypt the state
             encryptState();
             // Output encrypted block
-            outputState();
+            // outputState();
         }
     }
 

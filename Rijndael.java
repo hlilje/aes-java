@@ -2,9 +2,6 @@
  * Implementation of the Rijndael key schedule.
  */
 
-import java.util.Arrays;
-import java.util.Collections;
-
 
 public class Rijndael {
     // Rijndael S-box
@@ -73,7 +70,11 @@ public class Rijndael {
      * return the word [a1, a2, a3, a0]
      */
     private static void rotWord(byte[] word) {
-        Collections.rotate(Arrays.asList(word), -1);
+        int len = word.length;
+        byte[] tmp = new byte[len];
+        System.arraycopy(word, 1, tmp, 0, len - 1);
+        tmp[len-1] = word[0];
+        System.arraycopy(tmp, 0, word, 0, len);
     }
 
     /**
@@ -96,7 +97,11 @@ public class Rijndael {
             if (i % offset == 0) {
                 // Rotate word, substitute it and XOR with Rcon to transform
                 // multiples of nk
+                for (byte b : temp) System.out.print(b + " ");
+                System.out.println();
                 rotWord(temp);
+                for (byte b : temp) System.out.print(b + " ");
+                System.out.println();
                 subWord(temp);
                 temp[0] = (byte) (temp[0] ^ rcon[rconIt]);
                 rconIt += 1;
