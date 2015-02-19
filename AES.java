@@ -87,6 +87,40 @@ public class AES {
         }
     }
 
+    /** 
+     * Multiplication in the Galois field GF(2^8).
+     */
+    private static void galoismUlt(byte a, byte b) {
+        byte p = 0;
+        byte hiBitSet = 0;
+        for (int i = 0; i < 8; ++i) {
+            if (b & 1 == 1)
+                p ^= a;
+            hiBitSet = a & 0x80;
+            a <<= 1;
+            if (hiBitSet == 0x80)
+                a ^= 0x1b;
+            b >>= 1;
+        }
+        return p % 256;
+    }
+
+def mix_column(column):
+    """
+    Mix one column by by considering it as a polynomial and performing
+    operations in the Galois field (2^8).
+    """
+    # XOR is addition in this field
+    temp = copy.copy(column) # Store temporary column for operations
+    column[0] = galois_mult(temp[0], 2) ^ galois_mult(temp[1], 3) ^ \
+                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 1)
+    column[1] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 2) ^ \
+                galois_mult(temp[2], 3) ^ galois_mult(temp[3], 1)
+    column[2] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 1) ^ \
+                galois_mult(temp[2], 2) ^ galois_mult(temp[3], 3)
+    column[3] = galois_mult(temp[0], 3) ^ galois_mult(temp[1], 1) ^ \
+                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 2)
+
     /**
      * Encrypt the current state.
      */
