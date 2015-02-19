@@ -163,11 +163,11 @@ public class AES {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                System.out.write(state[j][i]);
-                sb.append(String.format("%02X ", state[j][i]));
+                // System.out.write(state[j][i]);
+                sb.append(String.format("%02X ", state[j][i])); // TODO
             }
         }
-        System.out.flush();
+        // System.out.flush();
         System.out.println();
         System.out.println(sb);
     }
@@ -176,21 +176,18 @@ public class AES {
      * Iteratively encrypt blocks.
      */
     private static void encryptBlocks() {
-        // Pad plain text if necessary
-        padPlainText();
-
         for (int i = 0; i < numStates; ++i) {
             // Create one state
             createState();
             // Encrypt the state
             encryptState();
             // Output encrypted block
-            // outputState();
+            outputState();
         }
     }
 
     public static void main(String[] args) {
-        // Read the bytes from stdin
+        // Read the key and plain text bytes from stdin
         DataInputStream dis;
         try {
             dis = new DataInputStream(System.in);
@@ -205,8 +202,10 @@ public class AES {
         } catch (Exception e){
             e.printStackTrace();
         }
+        // Pad plain text if necessary
+        padPlainText();
 
-        byte[] key = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        // byte[] key = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO
 
         // Expand encryption key
         Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
