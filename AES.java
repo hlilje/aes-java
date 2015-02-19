@@ -160,12 +160,16 @@ public class AES {
      * Print the encrypted state to stdout.
      */
     private static void outputState() {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
                 System.out.write(state[j][i]);
+                sb.append(String.format("%02X ", state[j][i]));
             }
         }
         System.out.flush();
+        System.out.println();
+        System.out.println(sb);
     }
 
     /**
@@ -211,10 +215,10 @@ public class AES {
         encryptBlocks();
 
         // Print key and data
-        for (byte b : key) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
-        sb = new StringBuilder();
-        for (byte b : plainText) sb.append(String.format("%02X ", b));
-        System.out.println(sb);
+        // for (byte b : key) sb.append(String.format("%02X ", b));
+        // System.out.println(sb);
+        // sb = new StringBuilder();
+        // for (byte b : plainText) sb.append(String.format("%02X ", b));
+        // System.out.println(sb);
     }
 }
