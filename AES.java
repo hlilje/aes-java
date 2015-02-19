@@ -50,9 +50,9 @@ public class AES {
      * Combine each byte of the state with a block of the round key using bitwise
      * XOR.
      */
-    private static void addRoundKey(int encRound, int offset) {
-        byte[] roundKey = new byte[offset];
-        int encRoundOffset = encRound * offset;
+    private static void addRoundKey(int encRound) {
+        byte[] roundKey = new byte[LENGTH_STATE];
+        int encRoundOffset = encRound * LENGTH_STATE;
         // Extract the transpose key to get order as columns instead of rows
         for (int i = 0; i < Nk; ++i) {
             for (int j = 0; j < Nk; ++j)
@@ -61,9 +61,8 @@ public class AES {
 
         // Column-wise XOR of state encryption key
         for (int i = 0; i < Nb; ++i) {
-            for (int j = 0; j < Nb; ++j) {
+            for (int j = 0; j < Nb; ++j)
                 state[j][i] = (byte) (state[j][i] ^ roundKey[i]);
-            }
         }
     }
 
@@ -74,7 +73,7 @@ public class AES {
     private static void subBytes() {
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                state[i][j] = (byte) Rijndael.sbox[state[i][j] & 0xFF];
+                state[j][i] = (byte) Rijndael.sbox[state[j][i] & 0xFF];
             }
         }
     }
@@ -116,9 +115,9 @@ public class AES {
      * operations in the Galois field (2^8).
      */
     private static void mixColumns() {
+        // Store temporary column for operations
+        byte[] temp = new byte[Nb];
         for (int i = 0; i < Nb; ++i) {
-            // Store temporary column for operations
-            byte[] temp = new byte[Nb];
             for (int j = 0; j < Nb; ++j) {
                 temp[j] = state[j][i];
             }
@@ -138,21 +137,20 @@ public class AES {
      * Encrypt the current state.
      */
     private static void encryptState() {
-        int offset = Nb * Nb;
         for (int i = 0; i < numStates; ++i) {
-            addRoundKey(0, offset); // Initial key round
+            addRoundKey(0); // Initial key round
 
             for (int j = 1; j < Nr; ++j) {
                 subBytes();
                 shiftRows();
                 mixColumns();
-                addRoundKey(j, offset);
+                addRoundKey(j);
             }
 
             // Leave out MixColumns for final round
             subBytes();
             shiftRows();
-            addRoundKey(Nr, offset);
+            addRoundKey(Nr);
         }
     }
 
