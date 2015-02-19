@@ -168,7 +168,7 @@ public class AES {
             }
         }
         // System.out.flush();
-        System.out.println();
+        System.out.println("Result:");
         System.out.println(sb);
     }
 
@@ -202,6 +202,11 @@ public class AES {
         } catch (Exception e){
             e.printStackTrace();
         }
+        // TODO
+        StringBuilder sb = new StringBuilder();
+        System.out.println("Plain text:");
+        for (int i = 0; i < textLength; ++i) sb.append(String.format("%02X ", plainText[i]));
+        System.out.println(sb);
         // Pad plain text if necessary
         padPlainText();
 
@@ -210,12 +215,13 @@ public class AES {
         // Expand encryption key
         Rijndael.expandKeys(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
 
+        // TODO
+        sb = new StringBuilder();
+        System.out.println("Key:");
+        for (byte b : key) sb.append(String.format("%02X ", b));
+        System.out.println(sb);
+
         // Start encryption
         encryptBlocks();
-
-        // TODO
-        // StringBuilder sb = new StringBuilder();
-        // for (byte b : key) sb.append(String.format("%02X ", b));
-        // System.out.println(sb);
     }
 }
