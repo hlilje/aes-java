@@ -4,6 +4,8 @@
  * Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 import java.io.DataInputStream;
+import java.util.Arrays;
+import java.util.Collections;
 
 
 public class AES {
@@ -65,10 +67,22 @@ public class AES {
      * Perform a non-linear substitution step by replacing each byte with another
      * according to a lookup table.
      */
-    private static void sybBytes() {
+    private static void subBytes() {
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
                 state[i][j] = (byte) Rijndael.sbox[state[i][j]];
+            }
+        }
+    }
+
+    /**
+     * Perform a transposition step where the last three rows of the state are
+     * shifted cyclically a certain number of steps.
+     */
+    private static void shiftRows() {
+        for (int i = 0; i < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
+                Collections.rotate(Arrays.asList(state[i]), -j);
             }
         }
     }
