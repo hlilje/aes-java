@@ -22,6 +22,7 @@ public class AES {
     private static int textLength   = 0;                        // Length of plain text in bytes
     private static int numStates    = 0;                        // Number of states
     private static int plainTextIt  = 0;                        // Current byte position in plain text
+    private static int roundKeyIt   = 0;                        // Current expanded key byte position
 
 
     /**
@@ -42,6 +43,20 @@ public class AES {
             for (int j = 0; j < Nb; ++j) {
                 state[j][i] = plainText[plainTextIt];
                 ++plainTextIt;
+            }
+        }
+    }
+
+    /**
+     * Combine each byte of the state with a block of the round key using bitwise
+     * XOR.
+     */
+    private static void addRoundKey() {
+        // Column-wise XOR of state encryption key
+        for (int i = 0; i < Nb; ++i) {
+            for (int j = 0; j < Nb; ++j) {
+                state[j][i] = (byte) (state[j][i] ^ w[roundKeyIt]);
+                ++roundKeyIt;
             }
         }
     }
