@@ -4,6 +4,8 @@
 
 
 public class Rijndael {
+    private static final byte[] rotTemp = new byte[4]; // Temp array for rotations
+
     // Rijndael S-box
     public static final int[] sbox = {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
             0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59,
@@ -56,6 +58,7 @@ public class Rijndael {
             0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74,
             0xe8, 0xcb};
 
+
     /**
      * Take a four-byte input word and apply the S-box to each of the four
      * bytes to produce an output word.
@@ -71,10 +74,9 @@ public class Rijndael {
      */
     private static void rotWord(byte[] word) {
         int len = word.length;
-        byte[] tmp = new byte[len];
-        System.arraycopy(word, 1, tmp, 0, len - 1);
-        tmp[len-1] = word[0];
-        System.arraycopy(tmp, 0, word, 0, len);
+        System.arraycopy(word, 1, rotTemp, 0, len - 1);
+        rotTemp[len-1] = word[0];
+        System.arraycopy(rotTemp, 0, word, 0, len);
     }
 
     /**

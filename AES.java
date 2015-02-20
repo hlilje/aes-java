@@ -20,6 +20,9 @@ public class AES {
     private static final byte[][] state     = new byte[Nb][Nb];         // State matrix
     private static final byte[] E           = new byte[256];            // Exp table (base 0x03)
     private static final byte[] L           = new byte[256];            // Log table (base 0x03)
+    private static final byte[] roundKey    = new byte[LENGTH_STATE];   // Current round key
+    private static final byte[] shiftBuffer = new byte[3];              // Array shift buffer
+    private static final byte[] mixTemp     = new byte[Nb];             // Temp array for column mix operations
 
     private static int textLength  = 0; // Length of plain text in bytes
     private static int numStates   = 0; // Number of states
@@ -53,7 +56,6 @@ public class AES {
      * XOR.
      */
     private static void addRoundKey(int encRound) {
-        byte[] roundKey = new byte[LENGTH_STATE];
         int encRoundOffset = encRound * LENGTH_STATE;
         // Extract the transpose key to get order as columns instead of rows
         for (int i = 0; i < Nk; ++i) {
@@ -88,12 +90,11 @@ public class AES {
      * shifted cyclically a certain number of steps.
      */
     private static void shiftRows() {
-        byte[] buffer = new byte[3];
         for (int i = 1; i < Nb; ++i) {
-            int toCopy = i; // Avoid recreating buffer
-            System.arraycopy(state[i], 0, buffer, 0, i);
+            int toCopy = i; // Avoid recreating shiftBuffer
+            System.arraycopy(state[i], 0, shiftBuffer, 0, i);
             System.arraycopy(state[i], i, state[i], 0, state[i].length - i);
-            System.arraycopy(buffer, 0, state[i], state[i].length - i, toCopy);
+            System.arraycopy(shiftBuffer, 0, state[i], state[i].length - i, toCopy);
         }
     }
 
@@ -172,29 +173,27 @@ public class AES {
      * operations in the Galois field (2^8).
      */
     private static void mixColumns() {
-        // Store temporary column for operations
-        byte[] temp = new byte[Nb];
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                temp[j] = state[j][i];
+                mixTemp[j] = state[j][i];
             }
             // XOR is addition in this field
-            // state[0][i] = (byte) (galoisMult(temp[0], (byte) 2) ^ galoisMult(temp[1], (byte) 3) ^
-            //                       galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 1));
-            // state[1][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 2) ^
-            //                       galoisMult(temp[2], (byte) 3) ^ galoisMult(temp[3], (byte) 1));
-            // state[2][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 1) ^
-            //                       galoisMult(temp[2], (byte) 2) ^ galoisMult(temp[3], (byte) 3));
-            // state[3][i] = (byte) (galoisMult(temp[0], (byte) 3) ^ galoisMult(temp[1], (byte) 1) ^
-            //                       galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 2));
-            state[0][i] = (byte) (fastMult(temp[0], (byte) 2) ^ fastMult(temp[1], (byte) 3) ^
-                    fastMult(temp[2], (byte) 1) ^ fastMult(temp[3], (byte) 1));
-            state[1][i] = (byte) (fastMult(temp[0], (byte) 1) ^ fastMult(temp[1], (byte) 2) ^
-                    fastMult(temp[2], (byte) 3) ^ fastMult(temp[3], (byte) 1));
-            state[2][i] = (byte) (fastMult(temp[0], (byte) 1) ^ fastMult(temp[1], (byte) 1) ^
-                    fastMult(temp[2], (byte) 2) ^ fastMult(temp[3], (byte) 3));
-            state[3][i] = (byte) (fastMult(temp[0], (byte) 3) ^ fastMult(temp[1], (byte) 1) ^
-                    fastMult(temp[2], (byte) 1) ^ fastMult(temp[3], (byte) 2));
+            // state[0][i] = (byte) (galoisMult(mixTemp[0], (byte) 2) ^ galoisMult(mixTemp[1], (byte) 3) ^
+            //                       galoisMult(mixTemp[2], (byte) 1) ^ galoisMult(mixTemp[3], (byte) 1));
+            // state[1][i] = (byte) (galoisMult(mixTemp[0], (byte) 1) ^ galoisMult(mixTemp[1], (byte) 2) ^
+            //                       galoisMult(mixTemp[2], (byte) 3) ^ galoisMult(mixTemp[3], (byte) 1));
+            // state[2][i] = (byte) (galoisMult(mixTemp[0], (byte) 1) ^ galoisMult(mixTemp[1], (byte) 1) ^
+            //                       galoisMult(mixTemp[2], (byte) 2) ^ galoisMult(mixTemp[3], (byte) 3));
+            // state[3][i] = (byte) (galoisMult(mixTemp[0], (byte) 3) ^ galoisMult(mixTemp[1], (byte) 1) ^
+            //                       galoisMult(mixTemp[2], (byte) 1) ^ galoisMult(mixTemp[3], (byte) 2));
+            state[0][i] = (byte) (fastMult(mixTemp[0], (byte) 2) ^ fastMult(mixTemp[1], (byte) 3) ^
+                                  fastMult(mixTemp[2], (byte) 1) ^ fastMult(mixTemp[3], (byte) 1));
+            state[1][i] = (byte) (fastMult(mixTemp[0], (byte) 1) ^ fastMult(mixTemp[1], (byte) 2) ^
+                                  fastMult(mixTemp[2], (byte) 3) ^ fastMult(mixTemp[3], (byte) 1));
+            state[2][i] = (byte) (fastMult(mixTemp[0], (byte) 1) ^ fastMult(mixTemp[1], (byte) 1) ^
+                                  fastMult(mixTemp[2], (byte) 2) ^ fastMult(mixTemp[3], (byte) 3));
+            state[3][i] = (byte) (fastMult(mixTemp[0], (byte) 3) ^ fastMult(mixTemp[1], (byte) 1) ^
+                                  fastMult(mixTemp[2], (byte) 1) ^ fastMult(mixTemp[3], (byte) 2));
         }
     }
 
@@ -221,17 +220,17 @@ public class AES {
      * Print the encrypted state to stdout.
      */
     private static void outputState() {
-        StringBuilder sb = new StringBuilder(); // DEBUG
+        // StringBuilder sb = new StringBuilder(); // DEBUG
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                // System.out.write(state[j][i]);
-                sb.append(String.format("%02X ", state[j][i])); // DEBUG
+                System.out.write(state[j][i]);
+                // sb.append(String.format("%02X ", state[j][i])); // DEBUG
             }
         }
-        // System.out.flush();
+        System.out.flush();
         // DEBUG
-        System.out.println("Result:");
-        System.out.println(sb);
+        // System.out.println("Result:");
+        // System.out.println(sb);
     }
 
     /**
