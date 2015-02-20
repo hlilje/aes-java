@@ -251,15 +251,18 @@ public class AES {
         // Read the key and plain text bytes from stdin
         DataInputStream dis;
         try {
-            dis = new DataInputStream(System.in);
-            for (int i = 0; dis.available() > 0 && i < LENGTH_KEY; ++i) {
-                key[i] = dis.readByte();
+            // Don't read with buffer since it is SLOW
+            for (int i = 0; i < LENGTH_KEY; ++i) {
+                key[i] = (byte) System.in.read();
             }
-            for (int i = 0; dis.available() > 0; ++i) {
-                plainText[i] = dis.readByte();
+            int i = 0;
+            int b = System.in.read();
+            while (b != -1) {
+                plainText[i] = (byte) b;
+                b = System.in.read();
                 ++textLength;
+                ++i;
             }
-            dis.close();
         } catch (Exception e){
             e.printStackTrace();
         }
