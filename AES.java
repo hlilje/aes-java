@@ -140,21 +140,19 @@ public class AES {
      * Encrypt the current state.
      */
     private static void encryptState() {
-        for (int i = 0; i < numStates; ++i) {
-            addRoundKey(0); // Initial key round
+        addRoundKey(0); // Initial key round
 
-            for (int j = 1; j < Nr; ++j) {
-                subBytes();
-                shiftRows();
-                mixColumns();
-                addRoundKey(j);
-            }
-
-            // Leave out MixColumns for final round
+        for (int j = 1; j < Nr; ++j) {
             subBytes();
             shiftRows();
-            addRoundKey(Nr);
+            mixColumns();
+            addRoundKey(j);
         }
+
+        // Leave out MixColumns for final round
+        subBytes();
+        shiftRows();
+        addRoundKey(Nr);
     }
 
     /**
@@ -164,14 +162,14 @@ public class AES {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                // System.out.write(state[j][i]);
-                sb.append(String.format("%02X ", state[j][i])); // DEBUG
+                System.out.write(state[j][i]);
+                // sb.append(String.format("%02X ", state[j][i])); // DEBUG
             }
         }
-        // System.out.flush();
+        System.out.flush();
         // DEBUG
-        System.out.println("Result:");
-        System.out.println(sb);
+        // System.out.println("Result:");
+        // System.out.println(sb);
     }
 
     /**
