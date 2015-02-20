@@ -18,6 +18,8 @@ public class AES {
     private static final byte[] plainText   = new byte[LENGTH_DATA];    // Unencrypted bytes
     private static final byte[] w           = new byte[LENGTH_EXP_KEY]; // Expanded cipher key
     private static final byte[][] state     = new byte[Nb][Nb];         // State matrix
+    private static final byte[] E           = new byte[256];            // Exp table (base 0x03)
+    private static final byte[] L           = new byte[256];            // Log table (base 0x03)
 
     private static int textLength  = 0; // Length of plain text in bytes
     private static int numStates   = 0; // Number of states
@@ -114,6 +116,41 @@ public class AES {
     }
 
     /**
+     * Create and load the E table.
+     */
+    private static void loadE() {
+        byte x = (byte) 0x01;
+        int index = 0;
+        E[index++] = (byte) 0x01;
+        for (int i = 0; i < 255; i++) {
+            byte y = fastMult(x, (byte) 0x03);
+            E[index++] = y;
+            x = y;
+        }
+    }
+
+    /**
+     * Load the L table using the E table.
+     */
+    private static void loadL() {
+        int index;
+        for (int i = 0; i < 255; i++) {
+            L[E[i] & 0xff] = (byte)i;
+        }
+    }
+
+    /**
+     * Fast multiply using table lookup.
+     */
+    private static byte fastMult(byte a, byte b){
+        int t = 0;;
+        if (a == 0 || b == 0) return 0;
+        t = (L[(a & 0xff)] & 0xff) + (L[(b & 0xff)] & 0xff);
+        if (t > 255) t = t - 255;
+        return E[(t & 0xff)];
+    }
+
+    /**
      * Mix one column by by considering it as a polynomial and performing
      * operations in the Galois field (2^8).
      */
@@ -125,14 +162,22 @@ public class AES {
                 temp[j] = state[j][i];
             }
             // XOR is addition in this field
-            state[0][i] = (byte) (galoisMult(temp[0], (byte) 2) ^ galoisMult(temp[1], (byte) 3) ^
-                                  galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 1));
-            state[1][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 2) ^
-                                  galoisMult(temp[2], (byte) 3) ^ galoisMult(temp[3], (byte) 1));
-            state[2][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 1) ^
-                                  galoisMult(temp[2], (byte) 2) ^ galoisMult(temp[3], (byte) 3));
-            state[3][i] = (byte) (galoisMult(temp[0], (byte) 3) ^ galoisMult(temp[1], (byte) 1) ^
-                                  galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 2));
+            // state[0][i] = (byte) (galoisMult(temp[0], (byte) 2) ^ galoisMult(temp[1], (byte) 3) ^
+            //                       galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 1));
+            // state[1][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 2) ^
+            //                       galoisMult(temp[2], (byte) 3) ^ galoisMult(temp[3], (byte) 1));
+            // state[2][i] = (byte) (galoisMult(temp[0], (byte) 1) ^ galoisMult(temp[1], (byte) 1) ^
+            //                       galoisMult(temp[2], (byte) 2) ^ galoisMult(temp[3], (byte) 3));
+            // state[3][i] = (byte) (galoisMult(temp[0], (byte) 3) ^ galoisMult(temp[1], (byte) 1) ^
+            //                       galoisMult(temp[2], (byte) 1) ^ galoisMult(temp[3], (byte) 2));
+            state[0][i] = (byte) (fastMult(temp[0], (byte) 2) ^ fastMult(temp[1], (byte) 3) ^
+                    fastMult(temp[2], (byte) 1) ^ fastMult(temp[3], (byte) 1));
+            state[1][i] = (byte) (fastMult(temp[0], (byte) 1) ^ fastMult(temp[1], (byte) 2) ^
+                    fastMult(temp[2], (byte) 3) ^ fastMult(temp[3], (byte) 1));
+            state[2][i] = (byte) (fastMult(temp[0], (byte) 1) ^ fastMult(temp[1], (byte) 1) ^
+                    fastMult(temp[2], (byte) 2) ^ fastMult(temp[3], (byte) 3));
+            state[3][i] = (byte) (fastMult(temp[0], (byte) 3) ^ fastMult(temp[1], (byte) 1) ^
+                    fastMult(temp[2], (byte) 1) ^ fastMult(temp[3], (byte) 2));
         }
     }
 
@@ -159,17 +204,17 @@ public class AES {
      * Print the encrypted state to stdout.
      */
     private static void outputState() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(); // DEBUG
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                System.out.write(state[j][i]);
-                // sb.append(String.format("%02X ", state[j][i])); // DEBUG
+                // System.out.write(state[j][i]);
+                sb.append(String.format("%02X ", state[j][i])); // DEBUG
             }
         }
-        System.out.flush();
+        // System.out.flush();
         // DEBUG
-        // System.out.println("Result:");
-        // System.out.println(sb);
+        System.out.println("Result:");
+        System.out.println(sb);
     }
 
     /**
@@ -203,6 +248,7 @@ public class AES {
             e.printStackTrace();
         }
 
+        // DEBUG
         // StringBuilder sb = new StringBuilder();
         // System.out.println("Plain text:");
         // for (int i = 0; i < textLength; ++i) sb.append(String.format("%02X ", plainText[i]));
@@ -214,10 +260,15 @@ public class AES {
         // Expand encryption key
         Rijndael.expandKey(key, w, LENGTH_STATE, LENGTH_KEY, LENGTH_EXP_KEY);
 
+        // DEBUG
         // sb = new StringBuilder();
         // System.out.println("Key:");
         // for (byte b : key) sb.append(String.format("%02X ", b));
         // System.out.println(sb);
+
+        // Init fast multiplication tables
+        loadE();
+        loadL();
 
         // Start encryption
         encrypt();
