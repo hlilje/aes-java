@@ -78,7 +78,7 @@ public class AES {
     private static void subBytes() {
         for (int i = 0; i < Nb; ++i) {
             for (int j = 0; j < Nb; ++j) {
-                state[j][i] = (byte) Rijndael.sbox[state[j][i] & 0xFF];
+                state[j][i] = (byte) Rijndael.sbox[state[j][i] & 0xff];
             }
         }
     }
@@ -116,6 +116,34 @@ public class AES {
     }
 
     /**
+     * Fast multiply using table lookup.
+     */
+    private static byte fastMult(byte a, byte b){
+        int t = 0;
+        if (a == 0 || b == 0) return 0;
+        t = (L[(a & 0xff)] & 0xff) + (L[(b & 0xff)] & 0xff);
+        if (t > 255) t = t - 255;
+        return E[(t & 0xff)];
+    }
+
+    /**
+     * Slow multiply, using shifting.
+     */
+    private static byte slowMult(byte a, byte b) {
+        byte aa = a, bb = b, r = 0, t;
+        while (aa != 0) {
+            if ((aa & 1) != 0)
+                r = (byte) (r ^ bb);
+            t = (byte) (bb & 0x80);
+            bb = (byte) (bb << 1);
+            if (t != 0)
+                bb = (byte) (bb ^ 0x1b);
+            aa = (byte) ((aa & 0xff) >> 1);
+        }
+        return r;
+    }
+
+    /**
      * Create and load the E table.
      */
     private static void loadE() {
@@ -123,7 +151,7 @@ public class AES {
         int index = 0;
         E[index++] = (byte) 0x01;
         for (int i = 0; i < 255; i++) {
-            byte y = fastMult(x, (byte) 0x03);
+            byte y = slowMult(x, (byte) 0x03);
             E[index++] = y;
             x = y;
         }
@@ -137,17 +165,6 @@ public class AES {
         for (int i = 0; i < 255; i++) {
             L[E[i] & 0xff] = (byte)i;
         }
-    }
-
-    /**
-     * Fast multiply using table lookup.
-     */
-    private static byte fastMult(byte a, byte b){
-        int t = 0;;
-        if (a == 0 || b == 0) return 0;
-        t = (L[(a & 0xff)] & 0xff) + (L[(b & 0xff)] & 0xff);
-        if (t > 255) t = t - 255;
-        return E[(t & 0xff)];
     }
 
     /**

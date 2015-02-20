@@ -62,7 +62,7 @@ public class Rijndael {
      */
     private static void subWord(byte[] word) {
         for (int i = 0; i < 4; ++i)
-            word[i] = (byte) sbox[word[i] & 0xFF];
+            word[i] = (byte) sbox[word[i] & 0xff];
     }
 
     /**
