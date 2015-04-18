@@ -1,4 +1,4 @@
-# krypto15-aes-java
+# aes-java
 
 128-bit AES encryption in ECB mode written in Java. Does not decrypt files.
 
