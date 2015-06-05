@@ -249,7 +249,6 @@ public class AES {
 
     public static void main(String[] args) {
         // Read the key and plain text bytes from stdin
-        DataInputStream dis;
         try {
             // Don't read with buffer since it is SLOW
             for (int i = 0; i < LENGTH_KEY; ++i) {
